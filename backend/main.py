@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import knowledge
+from routes import knowledge, chat
 
 app = FastAPI(title="Cerebrix API")
 
@@ -13,6 +13,7 @@ app.add_middleware(
 )
 
 app.include_router(knowledge.router)
+app.include_router(chat.router)
 
 
 @app.get("/api/health")

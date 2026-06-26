@@ -4,3 +4,4 @@ node_modules/
 chroma_data/
 __pycache__/
 *.pyc
+frontent/.env

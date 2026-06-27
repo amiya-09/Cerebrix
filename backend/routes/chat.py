@@ -3,11 +3,13 @@ from pydantic import BaseModel
 from typing import Optional
 
 from agents.support_agent import resolve
+from agents.router_agent import classify
+from agents.opportunity_agent import scan as scan_opportunity
 from db.supabase_client import supabase
 
 router = APIRouter()
 
-CONFIDENCE_THRESHOLD = 75  # balanced default — tune this after seeing real usage
+CONFIDENCE_THRESHOLD = 75
 
 
 class ChatRequest(BaseModel):
@@ -29,6 +31,12 @@ async def chat(payload: ChatRequest):
         "content": payload.message
     }).execute()
 
+    classification = classify(payload.message)
+    category = classification["category"]
+
+    if category == "sales_inquiry":
+        scan_opportunity(payload.message, conversation_id)
+
     result = resolve(payload.message)
 
     if result["confidence"] >= CONFIDENCE_THRESHOLD:
@@ -48,7 +56,8 @@ async def chat(payload: ChatRequest):
             "conversation_id": conversation_id,
             "status": "answered",
             "answer": result["answer"],
-            "confidence": result["confidence"]
+            "confidence": result["confidence"],
+            "category": category
         }
     else:
         supabase.table("review_queue").insert({
@@ -66,5 +75,6 @@ async def chat(payload: ChatRequest):
         return {
             "conversation_id": conversation_id,
             "status": "pending_review",
-            "confidence": result["confidence"]
+            "confidence": result["confidence"],
+            "category": category
         }

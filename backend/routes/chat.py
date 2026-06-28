@@ -5,6 +5,7 @@ from typing import Optional
 from agents.support_agent import resolve
 from agents.router_agent import classify
 from agents.opportunity_agent import scan as scan_opportunity
+from agents.sentiment_agent import analyze as analyze_sentiment
 from db.supabase_client import supabase
 
 router = APIRouter()
@@ -37,9 +38,16 @@ async def chat(payload: ChatRequest):
     if category == "sales_inquiry":
         scan_opportunity(payload.message, conversation_id)
 
+    sentiment_result = analyze_sentiment(payload.message, conversation_id)
+
     result = resolve(payload.message)
 
-    if result["confidence"] >= CONFIDENCE_THRESHOLD:
+    should_escalate = (
+        result["confidence"] < CONFIDENCE_THRESHOLD
+        or sentiment_result["force_escalate"]
+    )
+
+    if not should_escalate:
         supabase.table("messages").insert({
             "conversation_id": conversation_id,
             "role": "assistant",
@@ -57,14 +65,17 @@ async def chat(payload: ChatRequest):
             "status": "answered",
             "answer": result["answer"],
             "confidence": result["confidence"],
-            "category": category
+            "category": category,
+            "sentiment": sentiment_result["sentiment"],
+            "health_score": sentiment_result["new_health_score"]
         }
     else:
         supabase.table("review_queue").insert({
             "conversation_id": conversation_id,
             "ai_draft": result["answer"],
             "confidence": result["confidence"],
-            "status": "pending"
+            "status": "pending",
+            "priority": sentiment_result["force_escalate"]
         }).execute()
 
         supabase.table("conversations").update({
@@ -76,5 +87,8 @@ async def chat(payload: ChatRequest):
             "conversation_id": conversation_id,
             "status": "pending_review",
             "confidence": result["confidence"],
-            "category": category
+            "category": category,
+            "sentiment": sentiment_result["sentiment"],
+            "health_score": sentiment_result["new_health_score"],
+            "priority": sentiment_result["force_escalate"]
         }

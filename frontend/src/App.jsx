@@ -3,6 +3,7 @@ import Chat from "./pages/Chat";
 import Queue from "./pages/Queue";
 import KnowledgeBase from "./pages/KnowledgeBase";
 import Dashboard from "./pages/Dashboard";
+import Opportunities from "./pages/Opportunities";
 
 function App() {
   const navLinkClass = ({ isActive }) =>
@@ -17,6 +18,7 @@ function App() {
         <NavLink to="/" className={navLinkClass}>Chat</NavLink>
         <NavLink to="/queue" className={navLinkClass}>Review Queue</NavLink>
         <NavLink to="/kb" className={navLinkClass}>Knowledge Base</NavLink>
+        <NavLink to="/opportunities" className={navLinkClass}>Opportunities</NavLink>
         <NavLink to="/dashboard" className={navLinkClass}>Dashboard</NavLink>
       </nav>
 
@@ -25,6 +27,7 @@ function App() {
           <Route path="/" element={<Chat />} />
           <Route path="/queue" element={<Queue />} />
           <Route path="/kb" element={<KnowledgeBase />} />
+          <Route path="/opportunities" element={<Opportunities />} />
           <Route path="/dashboard" element={<Dashboard />} />
         </Routes>
       </main>

@@ -55,3 +55,14 @@ export function editQueueItem(id, finalResponse) {
 export function getDashboardSummary() {
   return request("/api/dashboard/summary");
 }
+
+export function listOpportunities() {
+  return request("/api/opportunities");
+}
+
+export function updateOpportunityStatus(id, status) {
+  return request(`/api/opportunities/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ status }),
+  });
+}

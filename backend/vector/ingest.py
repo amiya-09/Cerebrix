@@ -15,7 +15,7 @@ def chunk_text(text: str, chunk_size: int = 500, overlap: int = 50) -> list[str]
     return chunks
 
 
-def ingest_document(text: str, title: str) -> dict:
+def ingest_document(text: str, title: str, source: str = "uploaded") -> dict:
     chunks = chunk_text(text)
 
     doc_id = str(uuid.uuid4())
@@ -31,7 +31,7 @@ def ingest_document(text: str, title: str) -> dict:
     supabase.table("kb_articles").insert({
         "title": title,
         "content": text,
-        "source": "uploaded"
+        "source": source
     }).execute()
 
     return {"title": title, "chunks_created": len(chunks)}

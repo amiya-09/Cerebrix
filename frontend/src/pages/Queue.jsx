@@ -11,7 +11,11 @@ function Queue() {
   async function loadQueue() {
     setLoading(true);
     const data = await listQueue();
-    setItems(data);
+    const sorted = [...data].sort((a, b) => {
+      if (a.priority !== b.priority) return b.priority - a.priority;
+      return 0;
+    });
+    setItems(sorted);
     setLoading(false);
   }
 
@@ -56,9 +60,12 @@ function Queue() {
             onClick={() => handleSelect(item)}
             className={`w-full text-left p-3 border-b hover:bg-gray-50 ${
               item.id === selectedId ? "bg-blue-50" : ""
-            }`}
+            } ${item.priority ? "border-l-4 border-l-red-500" : ""}`}
           >
-            <p className="text-sm truncate">{item.ai_draft}</p>
+            {item.priority && (
+              <span className="text-xs font-bold text-red-600 mr-2">URGENT</span>
+            )}
+            <p className="text-sm truncate inline">{item.ai_draft}</p>
             <p className="text-xs text-gray-400 mt-1">
               Confidence: {item.confidence}%
             </p>

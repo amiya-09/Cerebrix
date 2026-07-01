@@ -11,3 +11,5 @@ if not all([GROQ_API_KEY, SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY]):
     raise EnvironmentError(
         "Missing one or more required environment variables. Check your .env file."
     )
+
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")

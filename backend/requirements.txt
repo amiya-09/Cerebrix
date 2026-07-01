@@ -8,3 +8,4 @@ groq
 pydantic
 python-multipart
 pypdf
+python-telegram-bot

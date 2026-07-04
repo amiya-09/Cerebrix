@@ -1,9 +1,9 @@
-import os
 import chromadb
 from chromadb.utils import embedding_functions
+import os
 
-_CHROMA_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "chroma_data")
-chroma_client = chromadb.PersistentClient(path=_CHROMA_PATH)
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+chroma_client = chromadb.PersistentClient(path=os.path.join(BASE_DIR, "chroma_data"))
 
 embedding_function = embedding_functions.SentenceTransformerEmbeddingFunction(
     model_name="all-MiniLM-L6-v2"

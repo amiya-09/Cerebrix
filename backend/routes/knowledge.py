@@ -28,6 +28,21 @@ async def upload_document(file: UploadFile = File(...)):
     if not text.strip():
         raise HTTPException(status_code=400, detail="File appears to be empty")
 
+    existing = (
+        supabase.table("kb_articles")
+        .select("id, title")
+        .eq("title", file.filename)
+        .eq("content", text)
+        .execute()
+        .data
+    )
+    if existing:
+        return {
+            "title": file.filename,
+            "chunks_created": 0,
+            "note": "Identical document already exists — skipped duplicate upload"
+        }
+
     result = ingest_document(text, title=file.filename)
     return result
 

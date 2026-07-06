@@ -66,3 +66,12 @@ export function updateOpportunityStatus(id, status) {
     body: JSON.stringify({ status }),
   });
 }
+
+export function listConversations(status = null) {
+  const query = status ? `?status=${status}` : "";
+  return request(`/api/conversations${query}`);
+}
+
+export function getConversationDetail(id) {
+  return request(`/api/conversations/${id}/messages`);
+}

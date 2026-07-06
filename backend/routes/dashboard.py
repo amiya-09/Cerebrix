@@ -8,7 +8,7 @@ router = APIRouter()
 @router.get("/api/dashboard/summary")
 async def dashboard_summary():
     conversations = supabase.table("conversations").select(
-        "status, resolution_confidence, health_score, sentiment, created_at"
+        "status, resolution_confidence, health_score, sentiment, created_at, channel"
     ).execute().data
     pending_queue = supabase.table("review_queue").select("id").eq("status", "pending").execute().data
 
@@ -28,6 +28,11 @@ async def dashboard_summary():
         if c["sentiment"] == "frustrated" and c["created_at"].startswith(today_str)
     ])
 
+    channel_breakdown = {}
+    for c in conversations:
+        ch = c.get("channel", "web")
+        channel_breakdown[ch] = channel_breakdown.get(ch, 0) + 1
+
     return {
         "total_conversations": total,
         "resolved": resolved,
@@ -35,5 +40,6 @@ async def dashboard_summary():
         "pending_in_queue": len(pending_queue),
         "average_confidence": avg_confidence,
         "average_health_score": avg_health_score,
-        "frustrated_today": frustrated_today
+        "frustrated_today": frustrated_today,
+        "channel_breakdown": channel_breakdown
     }

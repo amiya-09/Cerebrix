@@ -1,3 +1,5 @@
+from datetime import datetime, timezone
+
 from agents.support_agent import resolve
 from agents.router_agent import classify
 from agents.opportunity_agent import scan as scan_opportunity
@@ -62,7 +64,8 @@ def process_message(message: str, conversation_id: str = None, channel: str = "w
 
         supabase.table("conversations").update({
             "status": "resolved",
-            "resolution_confidence": result["confidence"]
+            "resolution_confidence": result["confidence"],
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }).eq("id", conversation_id).execute()
 
         return {
@@ -85,7 +88,8 @@ def process_message(message: str, conversation_id: str = None, channel: str = "w
 
         supabase.table("conversations").update({
             "status": "escalated",
-            "resolution_confidence": result["confidence"]
+            "resolution_confidence": result["confidence"],
+            "updated_at": datetime.now(timezone.utc).isoformat()
         }).eq("id", conversation_id).execute()
 
         return {

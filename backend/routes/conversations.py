@@ -8,8 +8,8 @@ router = APIRouter()
 @router.get("/api/conversations")
 async def list_conversations(status: Optional[str] = Query(None)):
     query = supabase.table("conversations").select(
-        "id, channel, status, sentiment, health_score, resolution_confidence, created_at"
-    ).order("created_at", desc=True)
+        "id, channel, status, sentiment, health_score, resolution_confidence, created_at, updated_at"
+    ).order("updated_at", desc=True)
 
     if status:
         query = query.eq("status", status)

@@ -26,7 +26,8 @@ def _resolve_queue_item(queue_id: str, final_response: str, conversation_id: str
     }).execute()
 
     supabase.table("conversations").update({
-        "status": "resolved"
+        "status": "resolved",
+        "updated_at": datetime.now(timezone.utc).isoformat()
     }).eq("id", conversation_id).execute()
 
 

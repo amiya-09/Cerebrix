@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { getDashboardSummary } from "../api/client";
+import TelegramBanner from "../components/TelegramBanner";
 
 function Dashboard() {
   const [summary, setSummary] = useState(null);
@@ -49,6 +50,7 @@ function Dashboard() {
 
   return (
     <div>
+      <TelegramBanner />
       <p className="text-xs text-gray-400 mb-4">Auto-refreshing every 5 seconds</p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {cards.map((card) => {
@@ -69,6 +71,32 @@ function Dashboard() {
           );
         })}
       </div>
+
+      {summary.channel_breakdown && (
+        <div className="mt-6 border rounded-md bg-white p-4">
+          <p className="text-xs font-semibold text-gray-500 mb-3">CONVERSATIONS BY CHANNEL</p>
+          <div className="space-y-2">
+            {Object.entries(summary.channel_breakdown).map(([channel, count]) => {
+              const total = Object.values(summary.channel_breakdown).reduce((a, b) => a + b, 0);
+              const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+              return (
+                <div key={channel}>
+                  <div className="flex justify-between text-xs text-gray-500 mb-1">
+                    <span className="uppercase font-medium">{channel}</span>
+                    <span>{count} ({pct}%)</span>
+                  </div>
+                  <div className="w-full bg-gray-100 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

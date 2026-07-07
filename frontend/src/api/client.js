@@ -75,3 +75,7 @@ export function listConversations(status = null) {
 export function getConversationDetail(id) {
   return request(`/api/conversations/${id}/messages`);
 }
+
+export function deleteArticle(id) {
+  return request(`/api/knowledge/articles/${id}`, { method: "DELETE" });
+}

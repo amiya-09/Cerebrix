@@ -1,9 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { getConversationDetail } from "../api/client";
+
+function relativeTime(iso) {
+  const diff = Math.floor((Date.now() - new Date(iso)) / 1000);
+  if (diff < 60) return "just now";
+  if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
+  return new Date(iso).toLocaleDateString();
+}
 
 function ConversationTranscript({ conversationId, refreshKey }) {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const bottomRef = useRef(null);
+  const prevMessageCountRef = useRef(0);
 
   useEffect(() => {
     if (!conversationId) return;
@@ -11,13 +21,27 @@ function ConversationTranscript({ conversationId, refreshKey }) {
     getConversationDetail(conversationId).then((res) => {
       setData(res);
       setLoading(false);
+      if (res.messages.length > prevMessageCountRef.current) {
+        prevMessageCountRef.current = res.messages.length;
+        setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+      } else {
+        prevMessageCountRef.current = res.messages.length;
+      }
     });
   }, [conversationId, refreshKey]);
 
   useEffect(() => {
     if (!conversationId) return;
     const interval = setInterval(() => {
-      getConversationDetail(conversationId).then(setData);
+      getConversationDetail(conversationId).then((res) => {
+        setData(res);
+        if (res.messages.length > prevMessageCountRef.current) {
+          prevMessageCountRef.current = res.messages.length;
+          setTimeout(() => bottomRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+        } else {
+          prevMessageCountRef.current = res.messages.length;
+        }
+      });
     }, 5000);
     return () => clearInterval(interval);
   }, [conversationId]);
@@ -43,6 +67,7 @@ function ConversationTranscript({ conversationId, refreshKey }) {
           </div>
         </div>
       )}
+      <div ref={bottomRef} />
     </div>
   );
 }
@@ -53,6 +78,7 @@ function Bubble({ message }) {
       <div className="flex justify-end">
         <div className="bg-blue-600 text-white px-4 py-2 rounded-lg max-w-md">
           {message.content}
+          <p className="text-xs text-blue-200 mt-1 text-right">{relativeTime(message.created_at)}</p>
         </div>
       </div>
     );
@@ -68,6 +94,7 @@ function Bubble({ message }) {
         {isHumanReviewed && (
           <p className="text-xs text-blue-500 mt-1">Answered by a human reviewer</p>
         )}
+        <p className="text-xs text-gray-400 mt-1">{relativeTime(message.created_at)}</p>
       </div>
     </div>
   );

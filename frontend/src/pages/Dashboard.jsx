@@ -3,9 +3,18 @@ import { Link } from "react-router-dom";
 import { getDashboardSummary } from "../api/client";
 import TelegramBanner from "../components/TelegramBanner";
 
+function formatLastUpdated(timestamp) {
+  if (!timestamp) return "";
+  const seconds = Math.floor((Date.now() - timestamp) / 1000);
+  if (seconds < 2) return "just now";
+  return `${seconds}s ago`;
+}
+
 function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [error, setError] = useState(null);
+  const [lastUpdated, setLastUpdated] = useState(null);
+  const [, forceTick] = useState(0);
 
   useEffect(() => {
     async function fetchSummary() {
@@ -13,6 +22,7 @@ function Dashboard() {
         const data = await getDashboardSummary();
         setSummary(data);
         setError(null);
+        setLastUpdated(Date.now());
       } catch (err) {
         setError("Couldn't reach the backend.");
       }
@@ -24,14 +34,39 @@ function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    const tick = setInterval(() => forceTick((t) => t + 1), 1000);
+    return () => clearInterval(tick);
+  }, []);
+
   if (error) return <p className="text-red-600 text-sm">{error}</p>;
   if (!summary) return <p className="text-gray-400">Loading dashboard...</p>;
 
   const cards = [
-    { label: "Total Conversations", value: summary.total_conversations, link: "/conversations" },
-    { label: "Resolved", value: summary.resolved, link: "/conversations?status=resolved" },
-    { label: "Escalated", value: summary.escalated, link: "/conversations?status=escalated" },
-    { label: "Pending in Queue", value: summary.pending_in_queue, link: "/queue" },
+    {
+      label: "Total Conversations",
+      value: summary.total_conversations,
+      link: "/conversations",
+      linkLabel: "View all",
+    },
+    {
+      label: "Resolved",
+      value: summary.resolved,
+      link: "/conversations?status=resolved",
+      linkLabel: "View all",
+    },
+    {
+      label: "Escalated",
+      value: summary.escalated,
+      link: "/conversations?status=escalated",
+      linkLabel: "View all",
+    },
+    {
+      label: "Pending in Queue",
+      value: summary.pending_in_queue,
+      link: "/queue",
+      linkLabel: "View all",
+    },
     {
       label: "Average Confidence",
       value: summary.average_confidence !== null ? `${summary.average_confidence}%` : "—",
@@ -51,15 +86,21 @@ function Dashboard() {
   return (
     <div>
       <TelegramBanner />
-      <p className="text-xs text-gray-400 mb-4">Auto-refreshing every 5 seconds</p>
+      <p className="text-xs text-gray-400 mb-4">Last updated: {formatLastUpdated(lastUpdated)}</p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {cards.map((card) => {
+          const hoverClass = card.link
+            ? "hover:shadow-lg hover:-translate-y-0.5 transition-all cursor-pointer"
+            : "hover:shadow-md transition-shadow";
           const content = (
-            <div className="border rounded-md bg-white p-4 hover:shadow-md transition-shadow">
+            <div className={`border rounded-md bg-white p-4 ${hoverClass}`}>
               <p className={`text-2xl font-bold ${card.alert ? "text-red-600" : ""}`}>
                 {card.value}
               </p>
               <p className="text-xs text-gray-500 mt-1">{card.label}</p>
+              {card.linkLabel && (
+                <p className="text-xs text-blue-600 font-medium mt-1">{card.linkLabel} →</p>
+              )}
             </div>
           );
           return card.link ? (

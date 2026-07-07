@@ -17,17 +17,17 @@ async def list_conversations(status: Optional[str] = Query(None)):
     conversations = query.execute().data
 
     for convo in conversations:
-        first_msg = (
+        latest_msg = (
             supabase.table("messages")
             .select("content")
             .eq("conversation_id", convo["id"])
             .eq("role", "user")
-            .order("created_at")
+            .order("created_at", desc=True)
             .limit(1)
             .execute()
             .data
         )
-        preview = first_msg[0]["content"] if first_msg else ""
+        preview = latest_msg[0]["content"] if latest_msg else ""
         convo["preview"] = preview[:80]
 
     return conversations

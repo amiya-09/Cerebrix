@@ -14,6 +14,14 @@ function ConversationTranscript({ conversationId, refreshKey }) {
     });
   }, [conversationId, refreshKey]);
 
+  useEffect(() => {
+    if (!conversationId) return;
+    const interval = setInterval(() => {
+      getConversationDetail(conversationId).then(setData);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [conversationId]);
+
   if (loading || !data) return <p className="text-gray-400 text-sm">Loading conversation...</p>;
 
   const { conversation, messages } = data;

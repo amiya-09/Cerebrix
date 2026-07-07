@@ -19,6 +19,13 @@ function ConversationSidebar({ selectedId, onSelect, refreshKey, statusFilter = 
     });
   }, [refreshKey, statusFilter]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      listConversations(statusFilter).then(setConversations);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [statusFilter]);
+
   if (loading) return <p className="p-4 text-gray-400 text-sm">Loading sessions...</p>;
   if (conversations.length === 0)
     return <p className="p-4 text-gray-400 text-sm">No conversations yet.</p>;

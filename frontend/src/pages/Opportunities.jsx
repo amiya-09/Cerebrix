@@ -71,14 +71,14 @@ function Opportunities() {
                   <button
                     onClick={() => handleUpdate(opp.id, "reviewed")}
                     disabled={updatingId === opp.id}
-                    className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md disabled:opacity-50"
+                    className="text-xs bg-blue-600 text-white px-3 py-1.5 rounded-md disabled:opacity-50 hover:bg-blue-700 transition-colors"
                   >
                     Mark Reviewed
                   </button>
                   <button
                     onClick={() => handleUpdate(opp.id, "dismissed")}
                     disabled={updatingId === opp.id}
-                    className="text-xs bg-gray-200 text-gray-700 px-3 py-1.5 rounded-md disabled:opacity-50"
+                    className="text-xs border border-gray-300 text-gray-700 px-3 py-1.5 rounded-md disabled:opacity-50 hover:bg-gray-50 transition-colors"
                   >
                     Dismiss
                   </button>
